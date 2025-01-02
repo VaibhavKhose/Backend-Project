@@ -29,6 +29,6 @@ import { v2 as cloudinary } from 'cloudinary';
             
         }
     }
-    erport {uploadOnCloudinary}
+    export {uploadOnCloudinary}
     
    

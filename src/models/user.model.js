@@ -1,6 +1,8 @@
 import mongoose, { Schema } from "mongoose";
-import jwt from "jsonweebtoken";
-import bcrypt from "bcrypt;"
+// import jwt from "jsonwebtoken";
+import jwt  from "jsonwebtoken";
+
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
     {
@@ -26,7 +28,7 @@ const userSchema = new Schema(
             trim:true,
             index:true    
         },
-        avtar:{
+        avatar:{
             type: String,  //cloudnary url
             required: true
                
@@ -36,7 +38,7 @@ const userSchema = new Schema(
         },
         watchHistory:[
             {
-                type : Schema.type.ObjectId,
+                type : Schema.Types.ObjectId,
                 ref:"Video"
             }
         ],
@@ -57,11 +59,11 @@ const userSchema = new Schema(
 
     
 )
-userSchema.pre(save, async function (next) {
-    if(!this.isModified("Password")) return next();
+userSchema.pre("save", async function (next) {
+    if(!this.isModified("password")) return next();
 
     
-    this.password =bcrypt.hash(this.password,10)
+    this.password = await bcrypt.hash(this.password,10)
     next()
 })
  
@@ -81,7 +83,7 @@ userSchema.methods.generateAccessToken = function(){
 
         
         {
-            expiresIN : process.env.ACCESS_TOKEN_EXPIRY
+            expiresIn : process.env.ACCESS_TOKEN_EXPIRY
         }
 
         )
@@ -99,7 +101,7 @@ userSchema.methods.generateRefreshToken = function(){
 
         
         {
-            expiresIN : process.env.REFRESH_TOKEN_EXPIRY
+            expiresIn : process.env.REFRESH_TOKEN_EXPIRY
         }
 
         )
