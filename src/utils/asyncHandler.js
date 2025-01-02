@@ -1,8 +1,8 @@
-import { json } from "express"
 
-const asyncHandler = (reqHandler) =>{
-(req,res,next)=>{
-    promise.resolve(req,res,next).catch((err)=>next(err))
+
+const asyncHandler = (requestHandler) =>{
+return (req,res,next)=>{
+    Promise.resolve(requestHandler(req,res,next)).catch((err)=>next(err))
     
 }
  }
