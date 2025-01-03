@@ -1,10 +1,9 @@
 
- import {asyncHandler} from "../utils/asyncHandler.js"
+import {asyncHandler} from "../utils/asyncHandler.js"
  import{ ApiError} from "../utils/ApiError.js"
-import {user}from "../models/user.model.js"
+import {User}from "../models/user.model.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
-import { ApiResponse } from "../utils/ApiResponse.js"
-
+import {ApiResponse} from "../utils/ApiResponse.js"
 const registerUser= asyncHandler(async (req, res)=>{
   
     const {fullName,email,userName,password}= req.body
@@ -16,14 +15,14 @@ const registerUser= asyncHandler(async (req, res)=>{
     ) {
         throw new ApiError(400,"all fields are required")
     }
-        user.findOne({
-            $or:[{username},{email}]
+        const existedUser= await User.findOne({
+            $or:[{userName},{email}]
         })
-        if(existerUser){
+        if(existedUser){
             throw new ApiError(409,"user with username and eamil already exists")
         }
         const avatarLocalPath = req.files?.avatar[0]?.path
-        const coverImageLocalPath = req.files?.avtar[0]?.path
+        const coverImageLocalPath = req.files?.coverImage[0]?.path
 
         if (!avatar) {
             throw new ApiError(400,"Avatar file is required")
@@ -33,9 +32,14 @@ const registerUser= asyncHandler(async (req, res)=>{
         const coverImage = await uploadOnCloudinary(coverImageLocalPath) ;
 
         if (!avatar) {
-            throw new ApiError(400,"Avatar file is required")
+            throw new ApiError(400,"failed to upload avatar on cloudinary")
         }
-        const user = await user.create({
+        if (!coverImage) {
+            throw new ApiError(400,"failed to upload coverImage on cloudinary")
+        }
+
+      
+        const user = await User.create({
             fullName,
             avatar:avatar.url,
             coverImage:coverImage?.url || "",
@@ -44,7 +48,9 @@ const registerUser= asyncHandler(async (req, res)=>{
             userName:userName.toLowerCase()
         })
 
-       const createdUser = await user.findById(user._id).select(
+        
+
+       const createdUser = await User.findById(user._id).select(
         "-password - refreshToken"
        )
        if (!createdUser) {
