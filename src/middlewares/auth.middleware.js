@@ -13,12 +13,12 @@ const verifyJWT = asyncHandler(async(req, res, next)=>{
      }
        const decodedToken =  jwt.verify(Token,process.env.ACCESS_TOKEN_SECRET)
  
-       await User.findById(decodedToken?._id).select("-password -refreshToken")
+       const user = await User.findById(decodedToken?._id).select("-password -refreshToken")
  
-       if (!User) {
+       if (!user) {
          throw new ApiError(404,"Invalid Access Token") 
        }
-       req.user = User;
+       req.user = user;
        next()  //user.routes.js line 26 automated run after first one 
  } catch (error) {
   throw new ApiError(404, error?.message || "invaild accessToken")
