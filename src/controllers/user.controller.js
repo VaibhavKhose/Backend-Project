@@ -145,8 +145,8 @@ const logoutUser = asyncHandler(async(req, res)=>{
     await User.findByIdAndUpdate(
         req.user._id,{
 
-         $set: {
-            refreshToken : undefined
+         $unset: {
+            refreshToken : 1
          }
          },
          {
@@ -325,7 +325,8 @@ const updateUserCoverImage = asyncHandler(async(req,res)=>{
         })
 
 const getUserChannelProfile = asyncHandler(async(req, res)=>{
-   const {userName} =  req.params
+   const {userName} =  req.body
+//    console.log("hey")
    if (!userName?.trim()) {
     throw new ApiError(400, "username is missing")
    }
@@ -358,7 +359,7 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
   {
     $addFields:{
         subscribersCount:{
-            $size : "subscribers"
+            $size : "$subscribers"
         },
         channelSubscribedToCount :{
             $size :"$subscriberTo"
@@ -366,7 +367,8 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
    
         isSubscribed : {
             $cond:{
-                if:{$in:[req.user?.id,"$subscribers.subscribe"]},
+                if: {$in: [req.user?._id, "$subscribers.subscriber"]},
+    
                 then:true,
                 else : false
                   }
@@ -395,6 +397,7 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
     return res
     .status(200)
     .json( new ApiResponse(200,channel[0],"User channel fetched successfully"))
+    console.log("hey")
 }) 
 
 const getWatchHistory = asyncHandler(async(req, res)=>{
